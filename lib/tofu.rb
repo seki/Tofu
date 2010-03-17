@@ -1,6 +1,5 @@
 require 'erb'
 require 'drb/drb'
-require 'tofu/tofu'
 require 'monitor'
 require 'digest/md5'
 require 'webrick'
@@ -30,6 +29,10 @@ module Tofu
 
     def expires
       Time.now + 24 * 60 * 60
+    end
+
+    def hint_expires
+      Time.now + 60 * 24 * 60 * 60
     end
 
     def expired?
@@ -149,7 +152,7 @@ module Tofu
     end
   end
 
-  class DivMethod
+  class ERBMethod
     def initialize(method_name, fname, dir=nil)
       @fname = build_fname(fname, dir)
       @method_name = method_name
@@ -185,15 +188,16 @@ module Tofu
 
   class Div
     include DRbUndumped
+    include ERB::Util
 
     @erb_method = []
     def self.add_erb(method_name, fname, dir=nil)
-      erb = DivMethod.new(method_name, fname, dir)
+      erb = ERBMethod.new(method_name, fname, dir)
       @erb_method.push(erb)
     end
 
     def self.set_erb(fname, dir=nil)
-      @erb_method = [DivMethod.new('to_html(context=nil)', fname, dir)]
+      @erb_method = [ERBMethod.new('to_html(context=nil)', fname, dir)]
       reload_erb
     end
 
@@ -333,18 +337,6 @@ module Tofu
     def a(method, param, context)
       make_anchor(method, param, context)
     end
-
-    def html_escape(s)
-      s.to_s.gsub(/&/n, '&amp;').gsub(/\"/n, '&quot;').gsub(/>/n, '&gt;').gsub(/</n, '&lt;')
-    end
-    alias h html_escape
-
-    def url_encode(s)
-      s.to_s.gsub(/([^ a-zA-Z0-9_.-]+)/n) do
-	'%' + $1.unpack('H2' * $1.size).join('%').upcase
-      end.tr(' ', '+')
-    end
-    alias u url_encode
   end
 
   def reload_erb
@@ -496,12 +488,14 @@ end
 
 if __FILE__ == $0
   require 'pp'
+
   class BaseDiv < Tofu::Div
-    include ERB::Util
-    def to_html(context=nil)
-      text = h(context.pretty_inspect)
-      "<html><title>base</title><body>Hello, World. <pre>#{text}</pre></body></html>"
-    end
+    ERB.new(<<EOS).def_method(self, 'to_html(context)')
+<html><title>base</title><body>
+Hello, World.
+<pre><%=h context.pretty_inspect%></pre>
+</body></html>
+EOS
   end
 
   class HelloSession < Tofu::Session
