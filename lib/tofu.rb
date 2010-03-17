@@ -236,7 +236,6 @@ module Tofu
 	end
       }
     end
-    alias :to_s :to_div
 
     def to_html(context)
       ''
@@ -489,20 +488,45 @@ end
 if __FILE__ == $0
   require 'pp'
 
+  class EnterDiv < Tofu::Div
+    ERB.new(<<EOS).def_method(self, 'to_html(context)')
+<%=form('enter', {}, context)%>
+<dl>
+<dt>hint</dt><dd><%=h @session.hint %><input class='enter' type='text' size='40' name='hint' value='<%=h @session.hint %>'/></dd>
+<dt>volatile</dt><dd><%=h @session.text %><input class='enter' type='text' size='40' name='text' value='<%=h @session.text%>'/></dd>
+</dl>
+</form>
+EOS
+    def do_enter(context, params)
+      hint ,= params['hint']
+      @session.hint = hint || ''
+      text ,= params['text']
+      @session.text = text || ''
+    end
+  end
+
   class BaseDiv < Tofu::Div
     ERB.new(<<EOS).def_method(self, 'to_html(context)')
 <html><title>base</title><body>
 Hello, World.
+<%= @enter.to_html(context) %>
+<hr />
 <pre><%=h context.pretty_inspect%></pre>
 </body></html>
 EOS
+    def initialize(session)
+      super(session)
+      @enter = EnterDiv.new(session)
+    end
   end
 
   class HelloSession < Tofu::Session
     def initialize(bartender, hint=nil)
       super
       @base = BaseDiv.new(self)
+      @text = ''
     end
+    attr_accessor :text
 
     def do_GET(context)
       update_div(context)
