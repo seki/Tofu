@@ -1,9 +1,7 @@
-require 'div/div'
-require 'div/tofusession'
 require 'nkf'
 require 'uri'
 
-module Div
+module Tofu
   class Div
     def update_js
       <<-"EOS"
@@ -94,7 +92,7 @@ EOS
     end
   end
   
-  class TofuSession
+  class Session
     def do_inner_html(context)
       params = context.req_params
       div_id ,= params['div_inner_id']

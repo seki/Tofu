@@ -347,49 +347,6 @@ module Tofu
   end
   module_function :reload_erb
 
-  module KCode
-    attr_reader(:lang, :charset)
-
-    def kconv(s)
-      return s unless @nkf
-      return '' unless s
-      NKF.nkf(@nkf, s)
-    end
-
-    def kconv_param(param)
-      hash = {}
-      param.each do |k, v|
-	hash[k] = v.collect do |s|
-	  kconv(s)
-	end
-      end
-      hash
-    end
-
-    def kcode
-      case $KCODE
-      when /^[Ee]/
-	@lang = 'ja'
-	@charset = 'euc-jp'
-	@nkf = '-edXm0'
-      when /^[Ss]/
-	@lang = 'ja'
-	@charset = 'Shift_JIS'
-	@nkf = '-sdXm0'
-      else
-	@lang = "en"
-	@charset = 'us-ascii'
-	@nkf = nil
-      end
-      require 'nkf' if @nkf
-    end
-
-    private :kcode
-
-    module_function :lang, :charset, :kconv, :kcode, :kconv_param
-    kcode()
-  end
-
   class Context
     def initialize(req, res)
       @req = req
@@ -495,6 +452,7 @@ if __FILE__ == $0
 <dt>hint</dt><dd><%=h @session.hint %><input class='enter' type='text' size='40' name='hint' value='<%=h @session.hint %>'/></dd>
 <dt>volatile</dt><dd><%=h @session.text %><input class='enter' type='text' size='40' name='text' value='<%=h @session.text%>'/></dd>
 </dl>
+<input type='submit' />
 </form>
 EOS
     def do_enter(context, params)
@@ -531,7 +489,7 @@ EOS
     def do_GET(context)
       update_div(context)
 
-      context.res_header('content-type', 'text/html; charset=euc-jp')
+      context.res_header('content-type', 'text/html; charset=utf-8')
       context.res_body(@base.to_html(context))
     end
   end
