@@ -1,0 +1,21 @@
+<% @session.wait %>
+<%= update_after(@session.interval, context)%>
+<%= on_update_script('document.title = "' + h(@session.headline) + '"') %>
+<ul>
+<%
+last_group = nil
+@content.each_slice(30) do |ary|
+  ary.each do |k, v|
+    time = Time.at(-0.1 * k)
+    str, from = v
+    group = group_header(from, time)
+    if group != last_group %>
+        <li class="group" style="color:<%= @color[from] %>"><%=h group %></li>
+<%    last_group = group
+    end
+%>      <li><%=h str %></li><%
+  end
+  break
+end
+%>
+</ul>
