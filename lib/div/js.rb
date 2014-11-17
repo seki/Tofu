@@ -41,7 +41,7 @@ module Tofu
             if (x.readyState == 4 && x.status == 200) {
               var div = document.getElementById(div_id);
               div.innerHTML = x.responseText;
-              div_x_eval(div_id, url);
+              div_x_eval(div_id);
             }
           }
           x.open("GET", url);
