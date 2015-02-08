@@ -141,8 +141,7 @@ module Tofu
       context.res_add_cookie(@prefix + '_id', sid, session.expires)
       hint = session.hint
       if hint
-	expires = Time.now + 60 * 24 * 60 * 60
-	context.res_add_cookie(@prefix +'_hint', hint, expires)
+	context.res_add_cookie(@prefix +'_hint', hint, session.hint_expires)
       end
       return sid
     end
