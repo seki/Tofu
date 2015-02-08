@@ -598,8 +598,6 @@ EOS
     def do_GET(context)
       update_div(context)
 
-      p Thread.current
-
       context.res_header('content-type', 'text/html; charset=utf-8')
       context.res_body(@base.to_html(context))
     end
