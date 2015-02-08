@@ -1,4 +1,3 @@
-require 'div/js'
 require 'tofu'
 require 'rinda/tuplespace'
 require 'singleton'
@@ -43,7 +42,7 @@ class Store
   end
 
   def via_cgi(context)
-    context.webrick_req.peeraddr[2] rescue nil
+    context.req.peeraddr[2] rescue nil
   end
   
   def latest
@@ -56,7 +55,8 @@ class Store
   
   def import_string(str)
     str.dup.force_encoding('utf-8')
-    # NKF.nkf('-edXm0', str)
+  rescue
+    "(?)"
   end
 
   def add(str, context=nil)
@@ -67,7 +67,6 @@ class Store
     begin
       key = -10 * Time.now.to_f
       @tree.unshift([key, [str, from]])
-      # @tree[key] = [str, from]
       str
     ensure
       @ts.write([:latest, key.to_i])
@@ -94,7 +93,7 @@ class KotoSession < Tofu::Session
     context.res_header('expires', 'Thu, 01 Dec 1994 16:00:00 GMT')
     return if do_inner_html(context)
     reset_age
-    context.res_header('content-type', 'text/html; charset=euc-jp')
+    context.res_header('content-type', 'text/html; charset=utf-8')
     context.res_body(@base.to_html(context))
   end
 
@@ -166,6 +165,13 @@ class MyTofulet < Tofu::CGITofulet
   end
 end
 
+tofu = Tofu::Bartender.new(KotoSession, 'koto_8080')
+s = WEBrick::HTTPServer.new(:Port => 8080)
+s.mount("/", Tofu::Tofulet, tofu)
+s.start
+
+=begin
+# dRuby & CGI style
 unless $DEBUG
   exit!(0) if fork
   Process.setsid
@@ -183,3 +189,5 @@ unless $DEBUG
 end
 
 DRb.thread.join
+=end
+
