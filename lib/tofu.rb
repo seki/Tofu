@@ -96,7 +96,6 @@ module Tofu
           @pool.delete(key)
           return nil
         end
-        session.renew
         return session
       end
     end
@@ -148,6 +147,7 @@ module Tofu
       if hint
 	context.res_add_cookie(@prefix +'_hint', hint, session.hint_expires)
       end
+      session.renew
       return sid
     end
 
