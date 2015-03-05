@@ -85,6 +85,10 @@ class KotoSession < Tofu::Session
   attr_reader :interval
   attr_reader :content
 
+  def expires
+    Time.now + 60
+  end
+
   def do_GET(context)
     update_div(context)
     

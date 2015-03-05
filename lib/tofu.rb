@@ -15,6 +15,7 @@ module Tofu
       @session_id = Digest::MD5.hexdigest(Time.now.to_s + __id__.to_s)
       @contents = {}
       @hint = hint
+      renew
     end
     attr_reader :session_id
     attr_accessor :hint
@@ -36,9 +37,12 @@ module Tofu
       Time.now + 60 * 24 * 60 * 60
     end
 
+    def renew
+      @expires = expires
+    end
+
     def expired?
-      it = expires
-      it && Time.now > it
+      @expires && Time.now > @expires
     end
 
     def do_GET(context)
@@ -92,6 +96,7 @@ module Tofu
           @pool.delete(key)
           return nil
         end
+        session.renew
         return session
       end
     end
