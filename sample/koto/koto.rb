@@ -78,7 +78,7 @@ class KotoSession < Tofu::Session
   def initialize(bartender, hint=nil)
     super
     @content = Store.instance
-    @base = BaseDiv.new(self)
+    @base = BaseTofu.new(self)
     @age = nil
     @interval = 5000
   end
@@ -90,7 +90,7 @@ class KotoSession < Tofu::Session
   end
 
   def do_GET(context)
-    update_div(context)
+    dispatch_tofu(context)
     
     context.res_header('pragma', 'no-cache')
     context.res_header('cache-control', 'no-cache')
@@ -115,17 +115,17 @@ class KotoSession < Tofu::Session
   end
 end
 
-class BaseDiv < Tofu::Div
+class BaseTofu < Tofu::Tofu
   set_erb('base.erb')
   
   def initialize(session)
     super(session)
-    @enter = EnterDiv.new(session)
-    @list = ListDiv.new(session)
+    @enter = EnterTofu.new(session)
+    @list = ListTofu.new(session)
   end
 end
 
-class EnterDiv < Tofu::Div
+class EnterTofu < Tofu::Tofu
   set_erb('enter.erb')
   
   def do_enter(context, params)
@@ -135,12 +135,12 @@ class EnterDiv < Tofu::Div
     @session.reset_age
   end
 
-  def div_id
+  def tofu_id
     'enter'
   end
 end
 
-class ListDiv < Tofu::Div
+class ListTofu < Tofu::Tofu
   set_erb('list.erb')
 
   Color = Hash.new do |h, k|

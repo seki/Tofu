@@ -46,20 +46,21 @@ module Tofu
     end
 
     def do_GET(context)
-      # update_div(context)
+      # dispacth_tofu(context)
+      # to_html(context)
     end
 
-    def update_div(context)
+    def dispatch_tofu(context)
       params = context.req_params
-      div_id ,= params['div_id']
-      div = fetch(div_id)
-      return unless div
-      div.send_request(context, context.req_params)
+      tofu_id ,= params['tofu_id']
+      tofu = fetch(tofu_id)
+      return unless tofu
+      tofu.send_request(context, context.req_params)
     end
 
-    def entry(div)
+    def entry(tofu)
       synchronize do
-	@contents[div.div_id] = div
+	@contents[tofu.tofu_id] = tofu
       end
     end
     
@@ -191,7 +192,7 @@ module Tofu
     end
   end
 
-  class Div
+  class Tofu
     include DRbUndumped
     include ERB::Util
 
@@ -220,20 +221,28 @@ module Tofu
     def initialize(session)
       @session = session
       @session.entry(self)
-      @div_seq = nil
+      @tofu_seq = nil
     end
     attr_reader :session
 
-    def div_class
+    def tofu_class
       self.class.to_s
     end
 
-    def div_id
+    def tofu_id
       self.__id__.to_s
     end
 
     def to_div(context)
-      elem('div', {'class'=>div_class, 'id'=>div_id}) {
+      to_elem('div', context)
+    end
+
+    def to_span(context)
+      to_elem('span', context)
+    end
+
+    def to_elem(elem, context)
+      elem('elem', {'class'=>tofu_class, 'id'=>tofu_id}) {
 	begin
 	  to_html(context)
 	rescue
@@ -247,13 +256,13 @@ module Tofu
     end
 
     def send_request(context, params)
-      cmd, = params['div_cmd']
+      cmd, = params['tofu_cmd']
       msg = 'do_' + cmd.to_s
 
-      if @div_seq
-	seq, = params['div_seq']
-	unless @div_seq.to_s == seq
-	  p [seq, @div_seq.to_s] if $DEBUG
+      if @tofu_seq
+	seq, = params['tofu_seq']
+	unless @tofu_seq.to_s == seq
+	  p [seq, @tofu_seq.to_s] if $DEBUG
 	  return
 	end
       end
@@ -264,7 +273,7 @@ module Tofu
 	do_else(context, params)
       end
     ensure
-      @div_seq = @div_seq.succ if @div_seq
+      @tofu_seq = @tofu_seq.succ if @tofu_seq
     end
 
     def do_else(context, params)
@@ -298,10 +307,10 @@ module Tofu
 
     def make_param(method_name, add_param={})
       param = {
-	'div_id' => div_id,
-	'div_cmd' => method_name
+	'tofu_id' => tofu_id,
+	'tofu_cmd' => method_name
       }
-      param['div_seq'] = @div_seq if @div_seq
+      param['tofu_seq'] = @tofu_seq if @tofu_seq
       param.update(add_param)
       return param
     end
@@ -345,7 +354,7 @@ module Tofu
 
   def reload_erb
     ObjectSpace.each_object(Class) do |o|
-      if o.ancestors.include?(Div)
+      if o.ancestors.include?(Tofu::Tofu)
 	o.reload_erb
       end
     end
@@ -448,16 +457,16 @@ module Tofu
 end
 
 module Tofu
-  class Div
+  class Tofu
     def update_js
       <<-"EOS"
-      function div_x_eval(div_id) {
-        var ary = document.getElementsByName(div_id + "div_x_eval");
+      function tofu_x_eval(tofu_id) {
+        var ary = document.getElementsByName(tofu_id + "tofu_x_eval");
         for (var j = 0; j < ary.length; j++) {
-          var div_arg = ary[j];
-          for (var i = 0; i < div_arg.childNodes.length; i++) {
-            var node = div_arg.childNodes[i];
-            if (node.attributes.getNamedItem('name').nodeValue == 'div_x_eval') {
+          var tofu_arg = ary[j];
+          for (var i = 0; i < tofu_arg.childNodes.length; i++) {
+            var node = tofu_arg.childNodes[i];
+            if (node.attributes.getNamedItem('name').nodeValue == 'tofu_x_eval') {
               var script = node.attributes.getNamedItem('value').nodeValue;
               try {
                  eval(script);
@@ -468,7 +477,7 @@ module Tofu
         }
       }
 
-      function div_x_update(div_id, url) {
+      function tofu_x_update(tofu_id, url) {
         var x;
         try {
           x = new ActiveXObject("Msxml2.XMLHTTP");
@@ -485,9 +494,9 @@ module Tofu
         if (x) {
           x.onreadystatechange = function() {
             if (x.readyState == 4 && x.status == 200) {
-              var div = document.getElementById(div_id);
-              div.innerHTML = x.responseText;
-              div_x_eval(div_id);
+              var tofu = document.getElementById(tofu_id);
+              tofu.innerHTML = x.responseText;
+              tofu_x_eval(tofu_id);
             }
           }
           x.open("GET", url);
@@ -500,7 +509,7 @@ EOS
     def a_and_update(method_name, add_param, context, target=nil)
       target ||= self
       param = {
-        'div_inner_id' => target.div_id
+        'tofu_inner_id' => target.tofu_id
       }
       param.update(add_param)
 
@@ -510,7 +519,7 @@ EOS
       end
       path = URI.parse(context.req_absolute_path)
       url = path + %Q!#{action(context)}?#{ary.join(';')}!
-      %Q!div_x_update("#{target.div_id}", #{url.to_s.dump});!
+      %Q!tofu_x_update("#{target.tofu_id}", #{url.to_s.dump});!
     end
 
     def on_update_script(ary_or_script)
@@ -519,9 +528,9 @@ EOS
             else
               ary_or_script
             end
-      str = %Q!<form name="#{div_id}div_x_eval">!
+      str = %Q!<form name="#{tofu_id}tofu_x_eval">!
       ary.each do |script|
-        str << %Q!<input type='hidden' name='div_x_eval' value="#{script.gsub('"', '&quot;')}" />!
+        str << %Q!<input type='hidden' name='tofu_x_eval' value="#{script.gsub('"', '&quot;')}" />!
       end
       str << '</form>'
       str
@@ -541,11 +550,11 @@ EOS
   class Session
     def do_inner_html(context)
       params = context.req_params
-      div_id ,= params['div_inner_id']
-      return false unless div_id
+      tofu_id ,= params['tofu_inner_id']
+      return false unless tofu_id
 
-      div = fetch(div_id)
-      body = div ? div.to_html(context) : ''
+      tofu = fetch(tofu_id)
+      body = tofu ? tofu.to_html(context) : ''
 
       context.res_header('content-type', 'text/html; charset=utf-8')
       context.res_body(body)
@@ -558,7 +567,7 @@ end
 if __FILE__ == $0
   require 'pp'
 
-  class EnterDiv < Tofu::Div
+  class EnterTofu < Tofu::Tofu
     ERB.new(<<EOS).def_method(self, 'to_html(context)')
 <%=form('enter', {}, context)%>
 <dl>
@@ -576,7 +585,7 @@ EOS
     end
   end
 
-  class BaseDiv < Tofu::Div
+  class BaseTofu < Tofu::Tofu
     ERB.new(<<EOS).def_method(self, 'to_html(context)')
 <html><title>base</title><body>
 Hello, World.
@@ -587,21 +596,20 @@ Hello, World.
 EOS
     def initialize(session)
       super(session)
-      @enter = EnterDiv.new(session)
+      @enter = EnterTofu.new(session)
     end
   end
 
   class HelloSession < Tofu::Session
     def initialize(bartender, hint=nil)
       super
-      @base = BaseDiv.new(self)
+      @base = BaseTofu.new(self)
       @text = ''
     end
     attr_accessor :text
 
     def do_GET(context)
-      update_div(context)
-
+      dispatch_tofu(context)
       context.res_header('content-type', 'text/html; charset=utf-8')
       context.res_body(@base.to_html(context))
     end
