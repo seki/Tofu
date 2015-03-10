@@ -90,12 +90,11 @@ class KotoSession < Tofu::Session
   end
 
   def do_GET(context)
-    dispatch_tofu(context)
-    
     context.res_header('pragma', 'no-cache')
     context.res_header('cache-control', 'no-cache')
     context.res_header('expires', 'Thu, 01 Dec 1994 16:00:00 GMT')
-    return if do_inner_html(context)
+    dispatch_event(context)
+    do_inner_html(context)
     reset_age
     context.res_header('content-type', 'text/html; charset=utf-8')
     context.res_body(@base.to_html(context))
@@ -104,6 +103,10 @@ class KotoSession < Tofu::Session
   def wait
     @content.wait(@age) if @age
     @age = @content.latest
+  end
+
+  def lookup_view(context)
+    @base
   end
 
   def reset_age
@@ -158,6 +161,11 @@ class ListTofu < Tofu::Tofu
     @color = Color
   end
 
+  def to_inner_html(context)
+    @session.wait
+    to_html(context)
+  end
+
   def group_header(from, time)
     from + ' @ ' + time.strftime("%H:%M")
   end
@@ -169,8 +177,9 @@ class MyTofulet < Tofu::CGITofulet
   end
 end
 
-tofu = Tofu::Bartender.new(KotoSession, 'koto_8080')
-s = WEBrick::HTTPServer.new(:Port => 8080)
+WEBrick::Daemon.start unless $DEBUG
+tofu = Tofu::Bartender.new(KotoSession, 'koto_8082')
+s = WEBrick::HTTPServer.new(:Port => 8082)
 s.mount("/", Tofu::Tofulet, tofu)
 s.start
 

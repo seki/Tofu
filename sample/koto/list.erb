@@ -1,4 +1,3 @@
-<% @session.wait %>
 <%= update_after(@session.interval, context)%>
 <%= on_update_script('document.title = "' + h(@session.headline) + '"') %>
 <ul>

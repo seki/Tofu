@@ -46,16 +46,23 @@ module Tofu
     end
 
     def do_GET(context)
-      # dispacth_tofu(context)
-      # to_html(context)
+      dispatch_event(context)
+      tofu = lookup_view(context)
+      body = tofu ? tofu.to_html(context) : ''
+      context.res_header('content-type', 'text/html; charset=utf-8')
+      context.res_body(body)
     end
 
-    def dispatch_tofu(context)
+    def dispatch_event(context)
       params = context.req_params
       tofu_id ,= params['tofu_id']
       tofu = fetch(tofu_id)
       return unless tofu
       tofu.send_request(context, context.req_params)
+    end
+
+    def lookup_view(context)
+      nil
     end
 
     def entry(tofu)
@@ -251,8 +258,10 @@ module Tofu
       }
     end
 
-    def to_html(context)
-      ''
+    def to_html(context); ''; end
+
+    def to_inner_html(context)
+      to_html(context)
     end
 
     def send_request(context, params)
@@ -554,12 +563,12 @@ EOS
       return false unless tofu_id
 
       tofu = fetch(tofu_id)
-      body = tofu ? tofu.to_html(context) : ''
+      body = tofu ? tofu.to_inner_html(context) : ''
 
       context.res_header('content-type', 'text/html; charset=utf-8')
       context.res_body(body)
 
-      return true
+      throw(:tofu_done)
     end
   end
 end
@@ -608,10 +617,8 @@ EOS
     end
     attr_accessor :text
 
-    def do_GET(context)
-      dispatch_tofu(context)
-      context.res_header('content-type', 'text/html; charset=utf-8')
-      context.res_body(@base.to_html(context))
+    def lookup_view(context)
+      @base
     end
   end
 
