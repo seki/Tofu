@@ -1,0 +1,49 @@
+<html>
+<meta name="viewport" content="width=320" />
+<head>
+<title><%=h @session.headline %></title>
+<style type="text/css" media="screen">
+body {
+    background: #FFFFFF;
+    color: #000000;
+}
+
+.EnterTofu * input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 16px 6px 6px 6px;
+    font-size: 16px;
+    font-weight: normal;
+    background: #6d84a2;
+}
+
+.ListTofu > ul {
+    margin: 0;
+    padding: 0;
+}
+
+.ListTofu > ul > li {
+    border-bottom: 1px solid #E0E0E0;
+    padding: 8px 0 8px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    list-style: none:
+}
+
+.ListTofu > ul > li.group {
+    top: -1px;
+    margin-bottom: -2px;
+    border-top: 1px solid #7d7d7d;
+    border-bottom: 1px solid #999999;
+    padding: 1px 5px;
+    font-size: 13px;
+    font-weight: bold;
+    text-shadow: rgba(0, 0, 0, 0.4) 0 1px 0;
+    color: #FFFFFF;
+}
+</style>
+</head>
+<body>
+<%= @prompt.to_div(context)%>
+</body>
+</html>

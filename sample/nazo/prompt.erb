@@ -1,0 +1,23 @@
+<%=form('prompt', {}, context)%>
+<p><%=h @nazo[:question] %></p><%
+
+  if @nazo[:choose].size == 1
+
+%><input class='enter' type='text' size='40' name='answer' value='' autocomplete='off' autofocus/><%
+
+  else
+
+%><select name='answer' autofocus><%
+
+    @nazo[:choose].sort_by {rand}.each do |x| 
+
+%><option value="<%=h x %>"><%=h x %></option><%
+
+    end
+
+%></select><%
+
+  end
+
+%><input class='submit' type='submit' value='OK' />
+</form>
