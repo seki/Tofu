@@ -1,3 +1,5 @@
+require "tofu/version"
+
 require 'erb'
 require 'drb/drb'
 require 'monitor'
