@@ -250,8 +250,8 @@ module Tofu
       to_elem('span', context)
     end
 
-    def to_elem(elem, context)
-      elem('elem', {'class'=>tofu_class, 'id'=>tofu_id}) {
+    def to_elem(element, context)
+      elem(element, {'class'=>tofu_class, 'id'=>tofu_id}) {
 	begin
 	  to_html(context)
 	rescue
