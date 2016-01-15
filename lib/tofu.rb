@@ -400,10 +400,12 @@ module Tofu
 
     def req_cookie(name)
       found = @req.cookies.find {|c| c.name == name}
-      found ? found.value : nil
+      return nil unless found
+      WEBrick::HTTPUtils::unescape(found.value) rescue nil
     end
 
     def res_add_cookie(name, value, expires=nil)
+      value = WEBrick::HTTPUtils::escape(value)
       c = WEBrick::Cookie.new(name, value)
       c.expires = expires if expires
       @res.cookies.push(c)
