@@ -344,7 +344,7 @@ module Tofu
       ary = param.collect do |k, v|
       	"#{u(k)}=#{u(v)}"
       end
-      %Q!href="#{action(context)}?#{ary.join(';')}"!
+      %Q!href="#{action(context)}?#{ary.join('&')}"!
     end
 
     def input_hidden(param)
@@ -531,7 +531,7 @@ EOS
 	      "#{u(k)}=#{u(v)}"
       end
       path = URI.parse(context.req_absolute_path)
-      url = path + %Q!#{action(context)}?#{ary.join(';')}!
+      url = path + %Q!#{action(context)}?#{ary.join('&')}!
       %Q!tofu_x_update("#{target.tofu_id}", #{url.to_s.dump});!
     end
 
