@@ -25,9 +25,9 @@ module Tofu
     def service(context)
       case context.req_method
       when 'GET', 'POST', 'HEAD'
-	do_GET(context)
+	      do_GET(context)
       else
-	context.res_method_not_allowed
+	      context.res_method_not_allowed
       end
     end
 
@@ -69,7 +69,7 @@ module Tofu
 
     def entry(tofu)
       synchronize do
-	@contents[tofu.tofu_id] = tofu
+      	@contents[tofu.tofu_id] = tofu
       end
     end
     
@@ -155,7 +155,7 @@ module Tofu
       context.res_add_cookie(@prefix + '_id', sid, session.expires)
       hint = session.hint
       if hint
-	context.res_add_cookie(@prefix +'_hint', hint, session.hint_expires)
+      	context.res_add_cookie(@prefix +'_hint', hint, session.hint_expires)
       end
       session.renew
       return sid
@@ -191,11 +191,11 @@ module Tofu
 
       found = fname # default
       ary.each do |dir|
-	path = File::join(dir, fname)
-	if File::readable?(path)
-	  found = path
-	  break
-	end
+        path = File::join(dir, fname)
+        if File::readable?(path)
+          found = path
+          break
+        end
       end
       found
     end
@@ -252,11 +252,11 @@ module Tofu
 
     def to_elem(element, context)
       elem(element, {'class'=>tofu_class, 'id'=>tofu_id}) {
-	begin
-	  to_html(context)
-	rescue
-	  "<p>error! #{h($!)}</p>"
-	end
+        begin
+          to_html(context)
+        rescue
+          "<p>error! #{h($!)}</p>"
+        end
       }
     end
 
@@ -271,17 +271,17 @@ module Tofu
       msg = 'do_' + cmd.to_s
 
       if @tofu_seq
-	seq, = params['tofu_seq']
-	unless @tofu_seq.to_s == seq
-	  p [seq, @tofu_seq.to_s] if $DEBUG
-	  return
-	end
+        seq, = params['tofu_seq']
+        unless @tofu_seq.to_s == seq
+          p [seq, @tofu_seq.to_s] if $DEBUG
+          return
+        end
       end
 
       if respond_to?(msg)
-	send(msg, context, params)
+      	send(msg, context, params)
       else
-	do_else(context, params)
+      	do_else(context, params)
       end
     ensure
       @tofu_seq = @tofu_seq.succ if @tofu_seq
@@ -297,11 +297,11 @@ module Tofu
     private
     def attr(opt)
       ary = opt.collect do |k, v|
-	if v 
-	  %Q!#{k}="#{h(v)}"!
-	else
-	  nil
-	end
+        if v 
+          %Q!#{k}="#{h(v)}"!
+        else
+          nil
+        end
       end.compact
       return nil if ary.size == 0 
       ary.join(' ')
@@ -312,14 +312,14 @@ module Tofu
       if block_given?
         %Q!<#{head}>\n#{yield}\n</#{name}>!
       else
-	%Q!<#{head} />!
+      	%Q!<#{head} />!
       end  
     end
 
     def make_param(method_name, add_param={})
       param = {
-	'tofu_id' => tofu_id,
-	'tofu_cmd' => method_name
+        'tofu_id' => tofu_id,
+        'tofu_cmd' => method_name
       }
       param['tofu_seq'] = @tofu_seq if @tofu_seq
       param.update(add_param)
@@ -328,11 +328,11 @@ module Tofu
 
     def form(method_name, context_or_param, context_or_empty=nil)
       if context_or_empty.nil? 
-	context = context_or_param
-	add_param = {}
+        context = context_or_param
+        add_param = {}
       else
-	context = context_or_empty
-	add_param = context_or_param
+        context = context_or_empty
+        add_param = context_or_param
       end
       param = make_param(method_name, add_param)
       hidden = input_hidden(param)
@@ -342,14 +342,14 @@ module Tofu
     def href(method_name, add_param, context)
       param = make_param(method_name, add_param)
       ary = param.collect do |k, v|
-	"#{u(k)}=#{u(v)}"
+      	"#{u(k)}=#{u(v)}"
       end
       %Q!href="#{action(context)}?#{ary.join(';')}"!
     end
 
     def input_hidden(param)
       ary = param.collect do |k, v|
-	%Q!<input type="hidden" name="#{h(k)}" value="#{h(v)}" />\n!
+	      %Q!<input type="hidden" name="#{h(k)}" value="#{h(v)}" />\n!
       end
       ary.join('')
     end
@@ -366,7 +366,7 @@ module Tofu
   def reload_erb
     ObjectSpace.each_object(Class) do |o|
       if o.ancestors.include?(Tofu::Tofu)
-	o.reload_erb
+	      o.reload_erb
       end
     end
   end
@@ -393,7 +393,7 @@ module Tofu
     def req_params
       hash = {}
       @req.query.each do |k,v|
-	hash[k] = v.list
+	      hash[k] = v.list
       end
       hash
     end
@@ -437,8 +437,8 @@ module Tofu
 
     def res_header(k, v)
       if k.downcase == 'status'
-	@res.status = v.to_i
-	return
+        @res.status = v.to_i
+        return
       end
       @res[k] = v
     end
@@ -528,7 +528,7 @@ EOS
 
       param = make_param(method_name, param)
       ary = param.collect do |k, v|
-	"#{u(k)}=#{u(v)}"
+	      "#{u(k)}=#{u(v)}"
       end
       path = URI.parse(context.req_absolute_path)
       url = path + %Q!#{action(context)}?#{ary.join(';')}!
