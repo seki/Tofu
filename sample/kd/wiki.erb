@@ -1,0 +1,13 @@
+<script language="JavaScript">
+function open_edit(){
+document.getElementById('edit').style.display = "block";
+}
+</script>
+<%= page(context).html %>
+<a href='javascript:open_edit()'>[edit]</a>
+<div id='edit' style='display:none;'>
+<%=form('edit', {'name' => context.req_path_info}, context) %>
+<textarea name='text' rows="40" cols="50"><%=h page(context).src %></textarea>
+<input type='submit' name='ok' value='ok'/>
+</form>
+</div>
