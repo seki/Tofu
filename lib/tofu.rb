@@ -136,9 +136,9 @@ module Tofu
 
     def service(context)
       begin
-	session = retrieve_session(context)
-	catch(:tofu_done) { session.service(context) }
-	store_session(context, session)
+        session = retrieve_session(context)
+        catch(:tofu_done) { session.service(context) }
+        store_session(context, session)
       ensure
       end
     end
