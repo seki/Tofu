@@ -366,7 +366,7 @@ module Tofu
   def reload_erb
     ObjectSpace.each_object(Class) do |o|
       if o.ancestors.include?(::Tofu::Tofu)
-	o.reload_erb
+	      o.reload_erb
       end
     end
   end
