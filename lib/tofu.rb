@@ -585,6 +585,45 @@ EOS
       throw(:tofu_done)
     end
   end
+
+  class ChunkedStream
+    def initialize(stream)
+      @data = nil
+      @cursor = 0
+      @stream = stream
+    end
+
+    def next_chunk
+      @stream.pop
+    rescue
+      raise EOFError
+    end
+
+    def close
+      @stream.close
+    end
+
+    def readpartial(size, buf='')
+      buf.clear
+      unless @data
+        @cursor = 0
+        @data = next_chunk
+        @data.force_encoding("ascii-8bit")
+      end
+      if @data.bytesize <= size
+        buf << @data
+        @data = nil
+      else
+        slice = @data.byteslice(@cursor, size)
+        @cursor += slice.bytesize
+        buf << slice
+        if @data.bytesize <= @cursor
+          @data = nil
+        end
+      end
+      buf
+    end
+  end
 end
 
 if __FILE__ == $0
