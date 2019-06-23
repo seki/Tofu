@@ -3,10 +3,10 @@ require "tofu/version"
 require 'erb'
 require 'drb/drb'
 require 'monitor'
-require 'digest/md5'
 require 'webrick'
 require 'webrick/cgi'
 require 'uri'
+require 'securerandom'
 
 module Tofu
   class Session
@@ -14,7 +14,7 @@ module Tofu
 
     def initialize(bartender, hint=nil)
       super()
-      @session_id = Digest::MD5.hexdigest(Time.now.to_s + __id__.to_s)
+      @session_id = SecureRandom.uuid
       @contents = {}
       @hint = hint
       renew
