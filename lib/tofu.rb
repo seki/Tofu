@@ -466,6 +466,16 @@ module Tofu
     def service(req, res)
       Context.new(req, res).service(@bartender)
     end
+
+    def start(env, stdin, stdout)
+      if env["SERVER_SOFTWARE"]
+        @config[:ServerSoftware] = env["SERVER_SOFTWARE"]
+      end
+      if %r{HTTP/(\d+\.\d+)} =~ env["SERVER_PROTOCOL"]
+        @config[:HTTPVersion] = $1
+      end
+      super(env, stdin, stdout)
+    end 
   end
 end
 
