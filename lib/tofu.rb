@@ -408,6 +408,7 @@ module Tofu
       value = WEBrick::HTTPUtils::escape(value)
       c = WEBrick::Cookie.new(name, value)
       c.expires = expires if expires
+      c.path = req_script_name.to_s
       @res.cookies.push(c)
     end
     
