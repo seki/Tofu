@@ -336,7 +336,7 @@ module Tofu
       end
       param = make_param(method_name, add_param)
       hidden = input_hidden(param)
-      %Q!<form action="#{action(context)}" method="post">\n! + hidden
+      %Q!<form action="#{action(context)}" method="post" enctype="multipart/form-data">\n! + hidden
     end
 
     def href(method_name, add_param, context)
